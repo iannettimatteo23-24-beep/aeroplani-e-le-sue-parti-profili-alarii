@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infografica Interattiva – Aeroplano e Profili Alari</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #0a1628;
+    --sky-mid: #0d2044;
+    --sky-light: #1a3a6e;
+    --cloud: #e8f0fe;
+    --gold: #f0b429;
+    --gold-light: #fcd96a;
+    --red: #e84444;
+    --green: #3dd68c;
+    --teal: #4ecdc4;
+    --white: #f5f8ff;
+    --text-dim: #8ba3c7;
+    --panel: rgba(13,32,68,0.85);
+    --border: rgba(240,180,41,0.3);
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Source Serif 4', serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--sky);
+    color: var(--white);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  /* ─── STARS BACKGROUND ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 40% 10%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 85% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5% 80%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 90%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 30% 75%, rgba(255,255,255,0.5) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: relative;
+    text-align: center;
+    padding: 70px 20px 50px;
+    background: linear-gradient(180deg, #040c1f 0%, var(--sky-mid) 100%);
+    border-bottom: 2px solid var(--border);
+    overflow: hidden;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, var(--sky-mid) 80%);
+  }
+
+  .school-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 6px 18px;
+    border-radius: 2px;
+    margin-bottom: 22px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--white);
+    animation: fadeDown 0.8s 0.2s ease both;
+  }
+
+  h1 span { color: var(--gold); }
+
+  .subtitle {
+    margin-top: 14px;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    color: var(--text-dim);
+    font-style: italic;
+    animation: fadeDown 0.8s 0.4s ease both;
+  }
+
+  .plane-hero {
+    margin: 40px auto 0;
+    width: min(700px, 90vw);
+    animation: float 6s ease-in-out infinite, fadeDown 1s 0.6s ease both;
+  }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 14px 20px;
+    background: rgba(4,12,31,0.95);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+
+  .tab-btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border: 1px solid rgba(240,180,41,0.25);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.25s;
+  }
+
+  .tab-btn:hover, .tab-btn.active {
+    background: var(--gold);
+    color: var(--sky);
+    border-color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    display: none;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    animation: sectionIn 0.5s ease both;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes sectionIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .section-intro {
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.7;
+  }
+
+  /* ─── ANATOMY INTERACTIVE ─── */
+  .anatomy-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto 40px;
+  }
+
+  .anatomy-svg {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 40px rgba(0,0,0,0.5));
+  }
+
+  .part-hotspot {
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .part-hotspot circle {
+    fill: var(--gold);
+    opacity: 0.85;
+    transition: all 0.2s;
+  }
+
+  .part-hotspot:hover circle,
+  .part-hotspot.active circle {
+    opacity: 1;
+    r: 10;
+  }
+
+  .part-hotspot text {
+    fill: var(--sky);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+  }
+
+  .info-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 30px;
+    margin-top: 20px;
+    min-height: 160px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .info-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--gold);
+    border-radius: 4px 0 0 4px;
+  }
+
+  .info-panel h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .info-panel p {
+    line-height: 1.75;
+    color: var(--cloud);
+    font-size: 0.98rem;
+  }
+
+  .info-panel .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--teal);
+    border: 1px solid var(--teal);
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  .info-panel .fun-fact {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: rgba(78,205,196,0.08);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.9rem;
+    color: var(--teal);
+    font-style: italic;
+  }
+
+  /* ─── PARTS GRID ─── */
+  .parts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+  }
+
+  .part-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    cursor: pointer;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .part-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(240,180,41,0.06), transparent 70%);
+    pointer-events: none;
+  }
+
+  .part-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--gold);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+
+  .part-card .num {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 600;
+    color: rgba(240,180,41,0.15);
+    position: absolute;
+    top: 14px; right: 18px;
+  }
+
+  .part-card h4 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .part-card p {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--text-dim);
+  }
+
+  .part-card .icon {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  /* ─── AIRFOIL SECTION ─── */
+  .airfoil-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-top: 10px;
+  }
+
+  .airfoil-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    transition: transform 0.25s, border-color 0.25s;
+  }
+
+  .airfoil-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--teal);
+  }
+
+  .airfoil-card h4 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--teal);
+    margin-bottom: 6px;
+  }
+
+  .airfoil-card .usage {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .airfoil-svg-wrap {
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+    padding: 20px 16px;
+    margin-bottom: 16px;
+  }
+
+  .airfoil-card p {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+
+  .airfoil-card ul {
+    margin-top: 10px;
+    padding-left: 18px;
+  }
+
+  .airfoil-card li {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 4px;
+  }
+
+  /* ─── FORCES SECTION ─── */
+  .forces-diagram {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+  }
+
+  .forces-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    font-size: 0.93rem;
+  }
+
+  .forces-table th {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-bottom: 2px solid var(--border);
+    padding: 12px 16px;
+    text-align: left;
+  }
+
+  .forces-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(240,180,41,0.08);
+    color: var(--cloud);
+    line-height: 1.55;
+    vertical-align: top;
+  }
+
+  .forces-table tr:hover td { background: rgba(240,180,41,0.04); }
+
+  .force-icon {
+    font-size: 1.4rem;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ─── CONTROLS SECTION ─── */
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .control-card {
+    background: var(--panel);
+    border: 1px solid rgba(61,214,140,0.25);
+    border-radius: 8px;
+    padding: 22px;
+    transition: transform 0.25s;
+  }
+
+  .control-card:hover { transform: translateY(-3px); }
+
+  .control-card h4 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .control-card .axis {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .control-card p {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--text-dim);
+  }
+
+  /* ─── QUIZ ─── */
+  .quiz-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .quiz-q {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .quiz-q.active { display: block; animation: sectionIn 0.4s ease both; }
+
+  .quiz-q h4 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--white);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .quiz-q .q-num {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .answer-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--cloud);
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+
+  .answer-btn:hover { border-color: var(--gold); background: rgba(240,180,41,0.06); }
+  .answer-btn.correct { border-color: var(--green); background: rgba(61,214,140,0.1); color: var(--green); }
+  .answer-btn.wrong   { border-color: var(--red);   background: rgba(232,68,68,0.08);  color: var(--red);   }
+
+  .quiz-feedback {
+    margin-top: 14px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    display: none;
+  }
+
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok  { background: rgba(61,214,140,0.1); border-left: 3px solid var(--green); color: var(--green); }
+  .quiz-feedback.no  { background: rgba(232,68,68,0.08); border-left: 3px solid var(--red);   color: var(--red);   }
+
+  .quiz-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .btn:hover { background: var(--gold); color: var(--sky); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn.primary { background: var(--gold); color: var(--sky); }
+
+  .score-display {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  /* ─── GLOSSARY ─── */
+  .glossary-search {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    margin-bottom: 24px;
+    outline: none;
+  }
+
+  .glossary-search:focus { border-color: var(--gold); }
+
+  .glossary-list dt {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    color: var(--gold);
+    margin-top: 20px;
+  }
+
+  .glossary-list dd {
+    font-size: 0.92rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-left: 0;
+    padding: 8px 0 12px;
+    border-bottom: 1px solid rgba(240,180,41,0.08);
+  }
+
+  .glossary-item { display: block; }
+  .glossary-item.hidden { display: none; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-10px); }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .parts-grid, .airfoil-grid, .controls-grid { grid-template-columns: 1fr; }
+    .forces-table { font-size: 0.82rem; }
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar {
+    height: 3px;
+    background: rgba(240,180,41,0.15);
+    border-radius: 2px;
+    margin-bottom: 30px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--teal));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── HIGHLIGHT LABEL ─── */
+  .highlight {
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .teal { color: var(--teal); }
+  .green { color: var(--green); }
+
+  /* ─── ANGLE OF ATTACK INTERACTIVE ─── */
+  .aoa-wrap {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    margin-top: 30px;
+  }
+
+  .aoa-wrap h4 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--teal);
+    margin-bottom: 6px;
+  }
+
+  .aoa-wrap label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    display: block;
+    margin: 18px 0 8px;
+  }
+
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--gold);
+    cursor: pointer;
+  }
+
+  .aoa-value {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    color: var(--gold);
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  .aoa-status {
+    margin-top: 14px;
+    font-size: 0.92rem;
+    font-style: italic;
+    color: var(--text-dim);
+    min-height: 50px;
+    line-height: 1.65;
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div style="font-family:var(--font-display); font-size:clamp(0.85rem,2vw,1.1rem); color:var(--text-dim); letter-spacing:0.08em; margin-bottom:12px; animation: fadeDown 0.6s ease both;">Matteo Iannetti</div>
+  <div class="school-badge">Scheda Didattica — Aerodinamica</div>
+  <h1>Aeroplano:<br><span>Parti &amp; Profili Alari</span></h1>
+  <p class="subtitle">Un viaggio interattivo nella meccanica del volo — dalla struttura all'aerodinamica</p>
+
+  <!-- Hero SVG plane -->
+  <svg class="plane-hero" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fuselage -->
+    <ellipse cx="350" cy="130" rx="290" ry="34" fill="#1a3a6e" stroke="#f0b429" stroke-width="1.5"/>
+    <!-- Nose -->
+    <path d="M 620 130 Q 660 130 665 128 Q 650 124 620 124 Z" fill="#f0b429"/>
+    <!-- Wings -->
+    <path d="M 320 130 L 260 50 L 200 55 L 280 130 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+    <path d="M 320 130 L 260 210 L 200 205 L 280 130 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+    <!-- Tail vertical -->
+    <path d="M 80 130 L 60 70 L 90 70 L 110 130 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+    <!-- Tail horizontal -->
+    <path d="M 85 128 L 55 150 L 55 160 L 90 138 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+    <path d="M 85 132 L 55 110 L 55 100 L 90 122 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+    <!-- Engine pod -->
+    <ellipse cx="295" cy="90" rx="28" ry="10" fill="#0a1628" stroke="#4ecdc4" stroke-width="1.2"/>
+    <ellipse cx="295" cy="170" rx="28" ry="10" fill="#0a1628" stroke="#4ecdc4" stroke-width="1.2"/>
+    <!-- Windows -->
+    <circle cx="500" cy="122" r="6" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+    <circle cx="470" cy="122" r="6" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+    <circle cx="440" cy="122" r="6" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+    <circle cx="410" cy="122" r="6" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+    <circle cx="380" cy="122" r="6" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+    <circle cx="350" cy="122" r="6" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+    <!-- Labels -->
+    <text x="350" y="18" text-anchor="middle" fill="#f0b429" font-family="JetBrains Mono" font-size="11" letter-spacing="2">INFOGRAFICA INTERATTIVA</text>
+  </svg>
+</header>
+
+<!-- ─── NAV TABS ─── -->
+<nav class="nav-tabs" id="mainNav">
+  <button class="tab-btn active" onclick="showSection('anatomia')">✈ Anatomia</button>
+  <button class="tab-btn" onclick="showSection('parti')">⚙ Parti</button>
+  <button class="tab-btn" onclick="showSection('profili')">〰 Profili Alari</button>
+  <button class="tab-btn" onclick="showSection('forze')">⬆ Le 4 Forze</button>
+  <button class="tab-btn" onclick="showSection('controlli')">🎮 Controlli</button>
+  <button class="tab-btn" onclick="showSection('glossario')">📖 Glossario</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     SEZIONE 1 — ANATOMIA INTERATTIVA
+═══════════════════════════════════════════ -->
+<section class="section active" id="anatomia">
+  <h2 class="section-title">Anatomia dell'Aeroplano</h2>
+  <p class="section-intro">Fai clic sui punti numerati per scoprire ogni componente. Ogni parte ha una funzione precisa che contribuisce al volo sicuro ed efficiente dell'aeromobile.</p>
+
+  <div class="anatomy-wrap">
+    <svg class="anatomy-svg" viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg">
+      <!-- Sky gradient bg -->
+      <defs>
+        <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#0a1628"/>
+          <stop offset="100%" style="stop-color:#0d2044"/>
+        </linearGradient>
+      </defs>
+      <rect width="860" height="340" fill="url(#skyGrad)" rx="10"/>
+
+      <!-- Main Fuselage -->
+      <ellipse cx="430" cy="170" rx="360" ry="42" fill="#112244" stroke="#f0b429" stroke-width="1.8"/>
+      <!-- Nose cone -->
+      <path d="M 770 170 Q 820 170 826 168 Q 810 162 770 162 Z" fill="#f0b429"/>
+      <!-- Main wings -->
+      <path d="M 400 170 L 320 68 L 240 74 L 340 170 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.5"/>
+      <path d="M 400 170 L 320 272 L 240 266 L 340 170 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.5"/>
+      <!-- Flap on wings -->
+      <path d="M 340 170 L 290 82 L 260 86 L 310 170 Z" fill="#1a3a6e" stroke="#4ecdc4" stroke-width="1.2"/>
+      <path d="M 340 170 L 290 258 L 260 254 L 310 170 Z" fill="#1a3a6e" stroke="#4ecdc4" stroke-width="1.2"/>
+      <!-- Aileron -->
+      <path d="M 290 82 L 250 76 L 240 80 L 260 86 Z" fill="#3dd68c" stroke="#3dd68c" stroke-width="0.8"/>
+      <path d="M 290 258 L 250 264 L 240 260 L 260 254 Z" fill="#3dd68c" stroke="#3dd68c" stroke-width="0.8"/>
+      <!-- Vertical stabilizer -->
+      <path d="M 95 170 L 70 88 L 104 88 L 130 170 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.5"/>
+      <!-- Rudder -->
+      <path d="M 80 112 L 70 88 L 90 96 Z" fill="#e84444" stroke="#e84444" stroke-width="0.8"/>
+      <!-- Horizontal stabilizers -->
+      <path d="M 105 164 L 68 192 L 68 202 L 110 174 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.5"/>
+      <path d="M 105 176 L 68 148 L 68 138 L 110 166 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.5"/>
+      <!-- Elevators -->
+      <path d="M 78 200 L 68 202 L 68 210 L 80 207 Z" fill="#e84444" stroke="#e84444" stroke-width="0.8"/>
+      <path d="M 78 140 L 68 138 L 68 130 L 80 133 Z" fill="#e84444" stroke="#e84444" stroke-width="0.8"/>
+      <!-- Engines -->
+      <ellipse cx="360" cy="108" rx="34" ry="12" fill="#0a1628" stroke="#4ecdc4" stroke-width="1.5"/>
+      <ellipse cx="360" cy="232" rx="34" ry="12" fill="#0a1628" stroke="#4ecdc4" stroke-width="1.5"/>
+      <!-- Cockpit -->
+      <path d="M 720 164 L 760 156 L 760 182 L 720 176 Z" fill="#1a3a6e" stroke="#4ecdc4" stroke-width="1.2"/>
+      <!-- Windows -->
+      <circle cx="640" cy="160" r="7" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+      <circle cx="612" cy="160" r="7" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+      <circle cx="584" cy="160" r="7" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+      <circle cx="556" cy="160" r="7" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+      <circle cx="528" cy="160" r="7" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+      <circle cx="500" cy="160" r="7" fill="none" stroke="#4ecdc4" stroke-width="1.2"/>
+      <!-- Landing gear hint -->
+      <line x1="430" y1="212" x2="430" y2="240" stroke="#8ba3c7" stroke-width="2" stroke-dasharray="4,3"/>
+      <ellipse cx="430" cy="244" rx="20" ry="6" fill="#1a3a6e" stroke="#8ba3c7" stroke-width="1"/>
+
+      <!-- HOTSPOTS -->
+      <g class="part-hotspot" onclick="showPart('fusoliera')">
+        <circle cx="550" cy="170" r="8"/>
+        <text x="550" y="170">1</text>
+      </g>
+      <g class="part-hotspot" onclick="showPart('ala')">
+        <circle cx="300" cy="90" r="8"/>
+        <text x="300" y="90">2</text>
+      </g>
+      <g class="part-hotspot" onclick="showPart('motore')">
+        <circle cx="360" cy="108" r="8"/>
+        <text x="360" y="108">3</text>
+      </g>
+      <g class="part-hotspot" onclick="showPart('deriva')">
+        <circle cx="90" cy="110" r="8"/>
+        <text x="90" y="110">4</text>
+      </g>
+      <g class="part-hotspot" onclick="showPart('stabilizzatore')">
+        <circle cx="90" cy="190" r="8"/>
+        <text x="90" y="190">5</text>
+      </g>
+      <g class="part-hotspot" onclick="showPart('alettone')">
+        <circle cx="252" cy="79" r="8"/>
+        <text x="252" y="79">6</text>
+      </g>
+      <g class="part-hotspot" onclick="showPart('flap')">
+        <circle cx="280" cy="108" r="8"/>
+        <text x="280" y="108">7</text>
+      </g>
+      <g class="part-hotspot" onclick="showPart('timone')">
+        <circle cx="78" cy="97" r="8"/>
+        <text x="78" y="97">8</text>
+      </g>
+      <g class="part-hotspot" onclick="showPart('cabina')">
+        <circle cx="740" cy="170" r="8"/>
+        <text x="740" y="170">9</text>
+      </g>
+      <g class="part-hotspot" onclick="showPart('carrello')">
+        <circle cx="430" cy="244" r="8"/>
+        <text x="430" y="244">10</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="info-panel" id="partInfo">
+    <p style="color:var(--text-dim); font-style:italic;">👆 Fai clic su un numero per scoprire quella parte dell'aeroplano.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SEZIONE 2 — PARTI
+═══════════════════════════════════════════ -->
+<section class="section" id="parti">
+  <h2 class="section-title">Le Parti dell'Aeroplano</h2>
+  <p class="section-intro">Un aeroplano è composto da numerosi sistemi integrati. Ogni componente svolge un ruolo specifico per garantire portanza, stabilità, propulsione e controllo durante tutte le fasi del volo.</p>
+
+  <div class="parts-grid">
+    <div class="part-card">
+      <span class="num">01</span>
+      <span class="icon">🛫</span>
+      <h4>Fusoliera</h4>
+      <p>È il corpo principale dell'aeroplano. Contiene la cabina passeggeri, l'abitacolo del pilota (cockpit), il carico e i sistemi principali. Ha forma affusolata per ridurre la resistenza aerodinamica (drag). Le strutture moderne sono in alluminio, titanio o materiali compositi come la fibra di carbonio.</p>
+    </div>
+    <div class="part-card">
+      <span class="num">02</span>
+      <span class="icon">🪂</span>
+      <h4>Ali (Superfici Portanti)</h4>
+      <p>Sono le superfici principali che generano la portanza (lift). Il profilo alare (airfoil) è progettato affinché l'aria scorra più velocemente sopra che sotto, creando una differenza di pressione che spinge l'ala verso l'alto (Principio di Bernoulli). L'apertura alare varia da pochi metri a oltre 80 m nei grandi aeromobili.</p>
+    </div>
+    <div class="part-card">
+      <span class="num">03</span>
+      <span class="icon">🔥</span>
+      <h4>Motori / Propulsori</h4>
+      <p>Generano la spinta (thrust) necessaria per avanzare. Possono essere a pistoni (aerei leggeri), a turboelica (aereo da turismo/cargo) o turbofan (jet commerciali). I moderni motori turbofan hanno rapporti di bypass elevati per maggiore efficienza e minor rumore. La spinta si misura in Newton (N) o libbre-forza (lbf).</p>
+    </div>
+    <div class="part-card">
+      <span class="num">04</span>
+      <span class="icon">↕</span>
+      <h4>Deriva (Piano Verticale)</h4>
+      <p>È la superficie fissa verticale posta in coda. Stabilizza l'aereo sull'asse verticale (imbardata – yaw), impedendo oscillazioni laterali indesiderate. Al suo bordo posteriore è incernierato il <strong>timone di direzione</strong> (rudder), che controlla attivamente l'imbardata.</p>
+    </div>
+    <div class="part-card">
+      <span class="num">05</span>
+      <span class="icon">↔</span>
+      <h4>Stabilizzatore Orizzontale</h4>
+      <p>La superficie fissa orizzontale di coda (piano di coda) garantisce la stabilità longitudinale sull'asse di beccheggio (pitch). Al bordo posteriore si trovano gli <strong>equilibratori (elevator)</strong>, che consentono al pilota di alzare o abbassare il muso dell'aereo.</p>
+    </div>
+    <div class="part-card">
+      <span class="num">06</span>
+      <span class="icon">🔁</span>
+      <h4>Alettoni (Ailerons)</h4>
+      <p>Superfici mobili sul bordo posteriore delle ali esterne. Si muovono in modo opposto: quando uno sale, l'altro scende. Controllano il rollio (roll) dell'aereo sull'asse longitudinale. Sono fondamentali nelle virate: abbassando un alettone si aumenta la portanza di quell'ala, inclinando l'aereo.</p>
+    </div>
+    <div class="part-card">
+      <span class="num">07</span>
+      <span class="icon">🔽</span>
+      <h4>Flap e Slat</h4>
+      <p>I <strong>flap</strong> (bordo d'uscita) e gli <strong>slat</strong> (bordo d'entrata) aumentano la curvatura del profilo alare durante il decollo e l'atterraggio, generando più portanza a basse velocità. In crociera si ritraggono per ridurre la resistenza. L'angolo di estensione può variare da 10° a 40° a seconda della fase.</p>
+    </div>
+    <div class="part-card">
+      <span class="num">08</span>
+      <span class="icon">↩</span>
+      <h4>Timone di Direzione (Rudder)</h4>
+      <p>Superficie mobile sulla deriva verticale, controllata dai pedali del pilota. Devia il muso lateralmente (imbardata). In volo normale è usato insieme agli alettoni per effettuare virate coordinate, senza slittamento. È fondamentale anche per correggere le asimmetrie di spinta in caso di guasto motore.</p>
+    </div>
+    <div class="part-card">
+      <span class="num">09</span>
+      <span class="icon">🪟</span>
+      <h4>Abitacolo / Cockpit</h4>
+      <p>La zona di comando del pilota e del copilota. Ospita tutti gli strumenti di navigazione, le centraline dei motori, i sistemi di comunicazione e il Flight Management System (FMS). Il parabrezza è in vetro stratificato resistente agli impatti con volatili (bird strike). Nei jet moderni è presente il vetro-casco (HUD).</p>
+    </div>
+    <div class="part-card">
+      <span class="num">10</span>
+      <span class="icon">🛞</span>
+      <h4>Carrello d'Atterraggio</h4>
+      <p>Sistema retrattile di ruote che assorbe gli urti durante l'atterraggio e consente il movimento a terra. Comprende il carrello anteriore (nose gear) e i due carrelli principali (main gear). Equipaggiati con freni a disco ad alta efficienza e sistemi antibloccaggio (antiskid), simili all'ABS degli autoveicoli.</p>
+    </div>
+    <div class="part-card">
+      <span class="num">11</span>
+      <span class="icon">📡</span>
+      <h4>Sistemi Avionici</h4>
+      <p>L'insieme dell'elettronica di bordo: GPS, radar meteorologico, TCAS (sistema anticollisione), transponder, radio VHF/HF, INS (sistema inerziale), e il computer di volo (FMC). Nei fly-by-wire il pilota comanda superfici di controllo tramite segnali elettrici elaborati da calcolatori, senza connessione meccanica diretta.</p>
+    </div>
+    <div class="part-card">
+      <span class="num">12</span>
+      <span class="icon">⛽</span>
+      <h4>Serbatoi Carburante</h4>
+      <p>Tipicamente integrati nelle ali (wet wing tanks). Nei grandi aerei il carburante (kerosene Jet-A1) è distribuito in più serbatoi per bilanciare il baricentro. Un Boeing 747 può contenere oltre 200.000 litri di carburante. I serbatoi sono pressurizzati per evitare bolle di vapore ad alta quota.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SEZIONE 3 — PROFILI ALARI
+═══════════════════════════════════════════ -->
+<section class="section" id="profili">
+  <h2 class="section-title">Profili Alari (Airfoils)</h2>
+  <p class="section-intro">Il profilo alare è la sezione trasversale dell'ala. La sua forma determina la portanza generata, la resistenza aerodinamica e le caratteristiche di stallo. Esistono molti tipi, ciascuno ottimizzato per specifiche condizioni di volo.</p>
+
+  <!-- Anatomia del profilo -->
+  <div style="background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:30px; margin-bottom:32px;">
+    <h3 style="font-family:var(--font-display); color:var(--gold); margin-bottom:18px;">Anatomia di un Profilo Alare</h3>
+    <svg viewBox="0 0 700 200" width="100%" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:16px;">
+      <rect width="700" height="200" fill="rgba(0,0,0,0.2)" rx="8"/>
+      <!-- Airfoil shape NACA-like -->
+      <path d="M 80 100 C 120 60 240 42 380 50 C 500 56 600 78 630 100
+               C 600 112 500 120 380 118 C 240 114 140 132 80 100 Z"
+            fill="#1a3a6e" stroke="#f0b429" stroke-width="2"/>
+      <!-- Chord line -->
+      <line x1="80" y1="100" x2="630" y2="100" stroke="#4ecdc4" stroke-width="1.5" stroke-dasharray="8,4"/>
+      <!-- Mean camber line -->
+      <path d="M 80 100 C 200 75 400 72 630 100" fill="none" stroke="#3dd68c" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <!-- Leading edge point -->
+      <circle cx="80" cy="100" r="5" fill="#f0b429"/>
+      <!-- Trailing edge point -->
+      <circle cx="630" cy="100" r="5" fill="#f0b429"/>
+      <!-- Max thickness arrow -->
+      <line x1="310" y1="46" x2="310" y2="116" stroke="#e84444" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <!-- Labels -->
+      <text x="80" y="90" fill="#f0b429" font-family="JetBrains Mono" font-size="10">Bordo d'entrata</text>
+      <text x="580" y="90" fill="#f0b429" font-family="JetBrains Mono" font-size="10">Bordo d'uscita</text>
+      <text x="290" y="35" fill="#e84444" font-family="JetBrains Mono" font-size="10">Spessore max.</text>
+      <text x="200" y="68" fill="#3dd68c" font-family="JetBrains Mono" font-size="10">Linea media</text>
+      <text x="320" y="140" fill="#4ecdc4" font-family="JetBrains Mono" font-size="10">Corda</text>
+      <text x="10" y="180" fill="#8ba3c7" font-family="JetBrains Mono" font-size="9">— — Corda    – – Linea media    — Profilo</text>
+    </svg>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-top:10px;">
+      <div><span style="color:var(--gold); font-weight:600;">Corda:</span><span style="color:var(--text-dim); font-size:0.9rem;"> Linea retta dal bordo d'entrata al bordo d'uscita. Definisce la lunghezza di riferimento del profilo.</span></div>
+      <div><span style="color:var(--green); font-weight:600;">Linea media:</span><span style="color:var(--text-dim); font-size:0.9rem;"> Curva equidistante tra il bordo superiore e inferiore. La sua curvatura definisce la "camber".</span></div>
+      <div><span style="color:var(--red); font-weight:600;">Spessore:</span><span style="color:var(--text-dim); font-size:0.9rem;"> Distanza massima tra bordo superiore e inferiore, in % della corda.</span></div>
+      <div><span style="color:var(--teal); font-weight:600;">Camber:</span><span style="color:var(--text-dim); font-size:0.9rem;"> Curvatura del profilo. Più è alto, maggiore è la portanza (ma anche il drag).</span></div>
+    </div>
+  </div>
+
+  <!-- Profili -->
+  <div class="airfoil-grid">
+
+    <div class="airfoil-card">
+      <h4>Profilo Simmetrico</h4>
+      <div class="usage">Aerei acrobatici • Elicotteri</div>
+      <div class="airfoil-svg-wrap">
+        <svg viewBox="0 0 300 80" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 20 40 C 60 15 160 12 280 40 C 160 68 60 65 20 40 Z" fill="#1a3a6e" stroke="#4ecdc4" stroke-width="1.5"/>
+          <line x1="20" y1="40" x2="280" y2="40" stroke="#8ba3c7" stroke-width="1" stroke-dasharray="4,3"/>
+        </svg>
+      </div>
+      <p>La linea media coincide con la corda: il profilo è identico sopra e sotto. Non genera portanza a 0° di incidenza. Permette il volo rovescio con le stesse caratteristiche del volo diritto.</p>
+      <ul>
+        <li>Portanza nulla a AOA = 0°</li>
+        <li>Ideale per acrobazie e loop</li>
+        <li>Resistenza aerodinamica maggiore rispetto ai profili con camber</li>
+      </ul>
+    </div>
+
+    <div class="airfoil-card">
+      <h4>Profilo Asimmetrico Convesso</h4>
+      <div class="usage">Aerei da trasporto • Aviazione generale</div>
+      <div class="airfoil-svg-wrap">
+        <svg viewBox="0 0 300 80" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 20 45 C 60 10 170 8 280 44 C 170 60 70 65 20 45 Z" fill="#1a3a6e" stroke="#4ecdc4" stroke-width="1.5"/>
+          <path d="M 20 45 C 120 30 230 32 280 44" fill="none" stroke="#3dd68c" stroke-width="1.2" stroke-dasharray="4,3"/>
+          <line x1="20" y1="45" x2="280" y2="44" stroke="#8ba3c7" stroke-width="1" stroke-dasharray="4,3"/>
+        </svg>
+      </div>
+      <p>Il dorso (estradosso) è più curvo del ventre (intradosso). L'aria sul dorso percorre un cammino più lungo → aumenta la velocità → diminuisce la pressione (Bernoulli). Genera portanza positiva già a 0°.</p>
+      <ul>
+        <li>Ottima portanza in crociera</li>
+        <li>Stallo più graduale</li>
+        <li>Il più diffuso nell'aviazione civile</li>
+      </ul>
+    </div>
+
+    <div class="airfoil-card">
+      <h4>Profilo Biconvesso</h4>
+      <div class="usage">Aerei supersonici • Caccia militari</div>
+      <div class="airfoil-svg-wrap">
+        <svg viewBox="0 0 300 80" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 20 40 C 80 22 180 20 280 40 C 180 58 80 58 20 40 Z" fill="#1a3a6e" stroke="#4ecdc4" stroke-width="1.5"/>
+          <line x1="20" y1="40" x2="280" y2="40" stroke="#3dd68c" stroke-width="1.2" stroke-dasharray="4,3"/>
+        </svg>
+      </div>
+      <p>Entrambe le superfici sono convesse con uguale curvatura. Usato per ali molto sottili nei velivoli supersonici. Bassa resistenza ad alte velocità. Lo spessore percentuale è molto ridotto (&lt;5%).</p>
+      <ul>
+        <li>Ottimo per volo supersonico</li>
+        <li>Portanza inferiore a basse velocità</li>
+        <li>Tipico di F-104, Concorde</li>
+      </ul>
+    </div>
+
+    <div class="airfoil-card">
+      <h4>Profilo Clark-Y</h4>
+      <div class="usage">Aerei leggeri • Modellismo</div>
+      <div class="airfoil-svg-wrap">
+        <svg viewBox="0 0 300 80" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 20 50 C 60 12 170 10 280 50 L 280 50 C 170 50 60 50 20 50 Z" fill="#1a3a6e" stroke="#4ecdc4" stroke-width="1.5"/>
+          <line x1="20" y1="50" x2="280" y2="50" stroke="#8ba3c7" stroke-width="1" stroke-dasharray="4,3"/>
+        </svg>
+      </div>
+      <p>Parte inferiore piatta, dorso curvo. Sviluppato da Virginius Clark nel 1922. Facile da costruire (fondo piatto), buona portanza, comportamento allo stallo prevedibile. Perfetto per aerei a bassa velocità.</p>
+      <ul>
+        <li>Spessore: ~11.7% della corda</li>
+        <li>Facile costruzione artigianale</li>
+        <li>Molto usato nel modellismo RC</li>
+      </ul>
+    </div>
+
+    <div class="airfoil-card">
+      <h4>Profilo NACA 4 cifre</h4>
+      <div class="usage">Standard internazionale di riferimento</div>
+      <div class="airfoil-svg-wrap">
+        <svg viewBox="0 0 300 80" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 20 44 C 65 12 180 10 280 44 C 200 58 80 62 20 44 Z" fill="#1a3a6e" stroke="#f0b429" stroke-width="1.5"/>
+          <text x="15" y="72" fill="#f0b429" font-family="JetBrains Mono" font-size="10">NACA 2412</text>
+        </svg>
+      </div>
+      <p>Sistema codificato sviluppato dalla NASA negli anni '30. <span class="highlight">Es. NACA 2412:</span> camber max 2% della corda, posizionata al 40% dalla punta, spessore massimo 12%. Migliaia di profili catalogati e testati in galleria del vento.</p>
+      <ul>
+        <li>NACA 0012: simmetrico puro</li>
+        <li>NACA 2412: aliante e Cessna 172</li>
+        <li>NACA 6-series: aerei da caccia WWII</li>
+      </ul>
+    </div>
+
+    <div class="airfoil-card">
+      <h4>Supercritico (Whitcomb)</h4>
+      <div class="usage">Jet moderni • Airbus • Boeing</div>
+      <div class="airfoil-svg-wrap">
+        <svg viewBox="0 0 300 80" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 20 44 C 80 20 200 22 280 44 C 200 58 90 68 20 44 Z" fill="#1a3a6e" stroke="#f0b429" stroke-width="1.5"/>
+          <path d="M 200 22 Q 250 30 280 44" fill="none" stroke="#e84444" stroke-width="2"/>
+          <text x="150" y="74" fill="#8ba3c7" font-family="JetBrains Mono" font-size="9">dorso quasi piatto</text>
+        </svg>
+      </div>
+      <p>Sviluppato da Richard Whitcomb negli anni '60. Il dorso quasi piatto ritarda la formazione di onde d'urto supersoniche locali (shock waves) nell'aviazione transonica (Mach 0.7–0.9). Fondamentale per i jet commerciali moderni.</p>
+      <ul>
+        <li>Ritarda il drag da compressibilità</li>
+        <li>Volo transonioco efficiente</li>
+        <li>Usato su A320, B737, B777</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Angle of Attack interactive -->
+  <div class="aoa-wrap">
+    <h4>🎛 Simulatore: Angolo di Attacco (AOA)</h4>
+    <p style="color:var(--text-dim); font-size:0.9rem; margin-top:8px;">L'angolo di attacco è l'angolo tra la corda del profilo alare e la direzione del flusso d'aria relativo. Muovi il cursore per esplorare gli effetti.</p>
+    <label for="aoaSlider">Angolo di Attacco: <span class="aoa-value" id="aoaVal">5°</span></label>
+    <input type="range" id="aoaSlider" min="-5" max="25" value="5" oninput="updateAOA(this.value)">
+    <div class="aoa-status" id="aoaStatus">✅ <strong>Regime normale di volo.</strong> Portanza ottimale. L'aria fluisce regolarmente sopra il profilo alare senza separazione dello strato limite.</div>
+    <svg id="aoaSvg" viewBox="0 0 500 150" width="100%" xmlns="http://www.w3.org/2000/svg" style="margin-top:16px; background:rgba(0,0,0,0.2); border-radius:6px; padding:10px;">
+      <defs>
+        <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <polygon points="0 0, 6 3, 0 6" fill="#4ecdc4"/>
+        </marker>
+        <marker id="arrowgold" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <polygon points="0 0, 6 3, 0 6" fill="#f0b429"/>
+        </marker>
+      </defs>
+      <!-- airflow arrows -->
+      <line x1="20" y1="70" x2="80" y2="70" stroke="#4ecdc4" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+      <line x1="20" y1="90" x2="80" y2="90" stroke="#4ecdc4" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+      <line x1="20" y1="110" x2="80" y2="110" stroke="#4ecdc4" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+      <!-- Airfoil group (will be rotated) -->
+      <g id="airfoilGroup" transform-origin="100 90">
+        <path d="M 100 90 C 140 60 260 58 380 90 C 260 108 140 118 100 90 Z" fill="#1a3a6e" stroke="#f0b429" stroke-width="1.8"/>
+        <!-- Lift arrow -->
+        <line id="liftArrow" x1="240" y1="58" x2="240" y2="28" stroke="#3dd68c" stroke-width="2" marker-end="url(#arrowhead)"/>
+        <text x="244" y="24" fill="#3dd68c" font-family="JetBrains Mono" font-size="10" id="liftLabel">LIFT</text>
+        <!-- Drag arrow -->
+        <line x1="380" y1="90" x2="430" y2="90" stroke="#e84444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="432" y="93" fill="#e84444" font-family="JetBrains Mono" font-size="10">DRAG</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SEZIONE 4 — LE 4 FORZE
+═══════════════════════════════════════════ -->
+<section class="section" id="forze">
+  <h2 class="section-title">Le 4 Forze del Volo</h2>
+  <p class="section-intro">Su ogni aeroplano in volo agiscono quattro forze fondamentali. L'equilibrio tra queste forze determina se l'aereo accelera, decelera, sale, scende o rimane in volo livellato costante.</p>
+
+  <div class="forces-diagram">
+    <svg viewBox="0 0 400 400" width="min(400px,90vw)" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="400" fill="rgba(0,0,0,0.15)" rx="10"/>
+      <!-- Central plane icon -->
+      <ellipse cx="200" cy="200" rx="55" ry="15" fill="#1a3a6e" stroke="#f0b429" stroke-width="2"/>
+      <path d="M 185 200 L 155 170 L 135 173 L 170 200 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.5"/>
+      <path d="M 185 200 L 155 230 L 135 227 L 170 200 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.5"/>
+
+      <!-- LIFT arrow (up) -->
+      <defs>
+        <marker id="aUp"    markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><polygon points="4 0, 8 8, 0 8" fill="#3dd68c"/></marker>
+        <marker id="aDown"  markerWidth="8" markerHeight="8" refX="4" refY="4" orient="270"><polygon points="4 0, 8 8, 0 8" fill="#e84444"/></marker>
+        <marker id="aRight" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="0"  ><polygon points="0 0, 8 4, 0 8" fill="#4ecdc4"/></marker>
+        <marker id="aLeft"  markerWidth="8" markerHeight="8" refX="4" refY="4" orient="180"><polygon points="0 0, 8 4, 0 8" fill="#f0b429"/></marker>
+      </defs>
+      <line x1="200" y1="185" x2="200" y2="80"  stroke="#3dd68c" stroke-width="3" marker-end="url(#aUp)"/>
+      <text x="210" y="75"  fill="#3dd68c" font-family="JetBrains Mono" font-size="13" font-weight="700">PORTANZA</text>
+      <text x="210" y="90"  fill="#3dd68c" font-family="JetBrains Mono" font-size="9">(Lift) ↑</text>
+
+      <!-- WEIGHT arrow (down) -->
+      <line x1="200" y1="215" x2="200" y2="330" stroke="#e84444" stroke-width="3" marker-end="url(#aDown)"/>
+      <text x="210" y="340" fill="#e84444" font-family="JetBrains Mono" font-size="13" font-weight="700">PESO</text>
+      <text x="210" y="355" fill="#e84444" font-family="JetBrains Mono" font-size="9">(Weight) ↓</text>
+
+      <!-- THRUST arrow (right) -->
+      <line x1="255" y1="200" x2="360" y2="200" stroke="#4ecdc4" stroke-width="3" marker-end="url(#aRight)"/>
+      <text x="310" y="185" fill="#4ecdc4" font-family="JetBrains Mono" font-size="13" font-weight="700">SPINTA</text>
+      <text x="318" y="198" fill="#4ecdc4" font-family="JetBrains Mono" font-size="9">(Thrust) →</text>
+
+      <!-- DRAG arrow (left) -->
+      <line x1="145" y1="200" x2="40"  y2="200" stroke="#f0b429" stroke-width="3" marker-end="url(#aLeft)"/>
+      <text x="15"  y="185" fill="#f0b429" font-family="JetBrains Mono" font-size="13" font-weight="700">RESIST.</text>
+      <text x="22"  y="198" fill="#f0b429" font-family="JetBrains Mono" font-size="9">(Drag) ←</text>
+
+      <!-- Balance labels -->
+      <text x="200" y="390" text-anchor="middle" fill="#8ba3c7" font-family="JetBrains Mono" font-size="9" letter-spacing="1">VOLO LIVELLATO: Portanza = Peso  |  Spinta = Resistenza</text>
+    </svg>
+  </div>
+
+  <table class="forces-table">
+    <thead>
+      <tr>
+        <th>Forza</th>
+        <th>Direzione</th>
+        <th>Generata da</th>
+        <th>Equazione semplificata</th>
+        <th>Note didattiche</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="force-icon">🟢</span><strong style="color:var(--green)">Portanza (Lift)</strong></td>
+        <td>⬆ Verticale verso l'alto</td>
+        <td>Profilo alare (differenza di pressione tra estradosso e intradosso)</td>
+        <td style="font-family:var(--font-mono); font-size:0.82rem;">L = ½·ρ·v²·S·C<sub>L</sub></td>
+        <td>Dipende da: velocità², densità dell'aria, superficie alare, coefficiente di portanza C<sub>L</sub> (legato al profilo e all'AOA)</td>
+      </tr>
+      <tr>
+        <td><span class="force-icon">🔴</span><strong style="color:var(--red)">Peso (Weight)</strong></td>
+        <td>⬇ Verticale verso il basso</td>
+        <td>Gravità terrestre che agisce sulla massa totale dell'aereo</td>
+        <td style="font-family:var(--font-mono); font-size:0.82rem;">W = m · g</td>
+        <td>Agisce nel baricentro (CG). Varia con il carburante consumato. In volo livellato: Portanza = Peso</td>
+      </tr>
+      <tr>
+        <td><span class="force-icon">🔵</span><strong style="color:var(--teal)">Spinta (Thrust)</strong></td>
+        <td>➡ Orizzontale in avanti</td>
+        <td>Motori (getto d'aria/gas espulso, oppure elica che spinge l'aria)</td>
+        <td style="font-family:var(--font-mono); font-size:0.82rem;">T = ṁ · Δv</td>
+        <td>Applicata lungo l'asse del motore. In crociera: Spinta = Resistenza. Terza legge di Newton (azione-reazione)</td>
+      </tr>
+      <tr>
+        <td><span class="force-icon">🟡</span><strong style="color:var(--gold)">Resistenza (Drag)</strong></td>
+        <td>⬅ Orizzontale all'indietro</td>
+        <td>Attrito dell'aria (drag di forma + drag indotto + drag d'onda)</td>
+        <td style="font-family:var(--font-mono); font-size:0.82rem;">D = ½·ρ·v²·S·C<sub>D</sub></td>
+        <td>Drag indotto aumenta con portanza (legato ai vortici alari). Drag parassita aumenta con v². Winglet riducono il drag indotto.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:24px; margin-top:30px;">
+    <h3 style="font-family:var(--font-display); color:var(--gold); margin-bottom:16px;">📐 Principio di Bernoulli e 3ª Legge di Newton</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <h4 style="color:var(--teal); font-family:var(--font-display); margin-bottom:8px;">Bernoulli</h4>
+        <p style="font-size:0.92rem; color:var(--text-dim); line-height:1.7;">In un fluido in moto, dove la velocità è maggiore la pressione è minore. L'aria che scorre sull'estradosso (più curvo) accelera → pressione cala → si crea una "aspirazione" verso l'alto.</p>
+      </div>
+      <div>
+        <h4 style="color:var(--green); font-family:var(--font-display); margin-bottom:8px;">Newton (3ª Legge)</h4>
+        <p style="font-size:0.92rem; color:var(--text-dim); line-height:1.7;">L'ala devia il flusso d'aria verso il basso (downwash). Per la terza legge, l'aria esercita una forza uguale e contraria sull'ala, spingendola verso l'alto. Entrambe le spiegazioni sono corrette e complementari.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SEZIONE 5 — CONTROLLI
+═══════════════════════════════════════════ -->
+<section class="section" id="controlli">
+  <h2 class="section-title">Superfici di Controllo</h2>
+  <p class="section-intro">Il pilota controlla l'orientamento dell'aereo attraverso tre assi di rotazione, ciascuno governato da specifiche superfici mobili. La padronanza di questi tre assi è fondamentale per comprendere il volo.</p>
+
+  <svg viewBox="0 0 700 280" width="100%" xmlns="http://www.w3.org/2000/svg" style="background:rgba(0,0,0,0.15); border-radius:10px; margin-bottom:30px;">
+    <rect width="700" height="280" fill="rgba(0,0,0,0.15)" rx="10"/>
+    <!-- Plane -->
+    <ellipse cx="350" cy="140" rx="240" ry="28" fill="#112244" stroke="#f0b429" stroke-width="1.5"/>
+    <!-- Wings -->
+    <path d="M 330 140 L 270 70 L 220 74 L 290 140 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+    <path d="M 330 140 L 270 210 L 220 206 L 290 140 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+    <!-- Vertical tail -->
+    <path d="M 125 140 L 108 80 L 135 80 L 148 140 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+    <!-- H-tail -->
+    <path d="M 130 135 L 100 158 L 100 166 L 133 146 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+    <path d="M 130 145 L 100 122 L 100 114 L 133 134 Z" fill="#0d2044" stroke="#f0b429" stroke-width="1.2"/>
+
+    <!-- ROLL axis (longitudinal) -->
+    <line x1="100" y1="140" x2="600" y2="140" stroke="#3dd68c" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <text x="605" y="143" fill="#3dd68c" font-family="JetBrains Mono" font-size="10" font-weight="700">ROLLIO</text>
+    <text x="605" y="155" fill="#3dd68c" font-family="JetBrains Mono" font-size="9">(Roll)</text>
+
+    <!-- PITCH axis (lateral) -->
+    <line x1="350" y1="40" x2="350" y2="240" stroke="#4ecdc4" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <text x="355" y="35" fill="#4ecdc4" font-family="JetBrains Mono" font-size="10" font-weight="700">BECCHEGGIO</text>
+    <text x="375" y="46" fill="#4ecdc4" font-family="JetBrains Mono" font-size="9">(Pitch)</text>
+
+    <!-- YAW axis (vertical) -->
+    <circle cx="350" cy="140" r="40" fill="none" stroke="#f0b429" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="310" y="100" fill="#f0b429" font-family="JetBrains Mono" font-size="10" font-weight="700">IMBARDATA</text>
+    <text x="322" y="112" fill="#f0b429" font-family="JetBrains Mono" font-size="9">(Yaw)</text>
+
+    <!-- Aileron labels -->
+    <text x="222" y="66" fill="#3dd68c" font-family="JetBrains Mono" font-size="9">ALETTONE ↑↓</text>
+    <text x="222" y="218" fill="#3dd68c" font-family="JetBrains Mono" font-size="9">ALETTONE ↓↑</text>
+  </svg>
+
+  <div class="controls-grid">
+    <div class="control-card">
+      <div class="axis">Asse Longitudinale</div>
+      <h4>Rollio (Roll)</h4>
+      <p><strong style="color:var(--green)">Controllato da: Alettoni</strong><br>Superfici mobili sulle ali esterne che si muovono in modo opposto. L'ala con alettone abbassato genera più portanza e si alza; l'ala opposta si abbassa. Produce l'inclinazione laterale dell'aereo, necessaria per le virate. Il pilota li comanda inclinando il joystick o ruotando il volantino.</p>
+    </div>
+    <div class="control-card">
+      <div class="axis">Asse Trasversale</div>
+      <h4>Beccheggio (Pitch)</h4>
+      <p><strong style="color:var(--teal)">Controllato da: Equilibratori (Elevator)</strong><br>Superfici mobili sul piano orizzontale di coda. Se si abbassano, il muso si alza (l'aereo sale); se si alzano, il muso si abbassa. Il pilota li comanda spingendo/tirando il joystick o la cloche. Negli aerei moderni fly-by-wire (Airbus) il segnale è elettronico.</p>
+    </div>
+    <div class="control-card">
+      <div class="axis">Asse Verticale</div>
+      <h4>Imbardata (Yaw)</h4>
+      <p><strong style="color:var(--gold)">Controllato da: Timone di Direzione (Rudder)</strong><br>Superficie mobile sulla deriva verticale. Il pilota la comanda con i pedali. In volo normale è usato per coordinare le virate ed evitare lo "slipping/skidding". È cruciale per decollare/atterrare con vento laterale (crosswind landing) e per recuperare uno stallo asimmetrico.</p>
+    </div>
+    <div class="control-card">
+      <div class="axis">Controllo Aggiuntivo</div>
+      <h4>Spoiler / Airbrake</h4>
+      <p><strong style="color:var(--red)">Funzione: Riduzione portanza + frenata</strong><br>Pannelli che si alzano dal dorso dell'ala per "rompere" il flusso laminare, riducendo la portanza e aumentando il drag. Usati durante la discesa (speed brake) e dopo l'atterraggio (ground spoiler) per scaricare velocemente il peso sulle ruote e rendere efficaci i freni.</p>
+    </div>
+    <div class="control-card">
+      <div class="axis">Variazione portanza</div>
+      <h4>Flap / Slat</h4>
+      <p><strong style="color:var(--teal)">Funzione: Alta portanza a bassa velocità</strong><br>Estesi durante il decollo (10-20°) e l'atterraggio (30-40°), aumentano la curvatura del profilo alare incrementando il coefficiente di portanza C<sub>L</sub>. Permettono velocità di avvicinamento più basse e sicure. Ritirati in crociera per minimizzare il drag aerodinamico.</p>
+    </div>
+    <div class="control-card">
+      <div class="axis">Trim System</div>
+      <h4>Trim (Compensatori)</h4>
+      <p><strong style="color:var(--green)">Funzione: Equilibrio senza sforzo</strong><br>Piccole superfici mobili (tab) sui bordi delle superfici di controllo principali. Permettono al pilota di "equilibrare" l'aereo in modo da non dover applicare costantemente una forza ai comandi. Usati soprattutto sull'equilibratore per compensare le variazioni di peso e velocità.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="quiz" style="display:none!important">
+  <h2 class="section-title">Metti alla prova le tue conoscenze</h2>
+  <p class="section-intro">10 domande sull'aerodinamica e le parti dell'aeroplano. Rispondi con cura — ogni domanda ha una sola risposta corretta.</p>
+
+  <div class="quiz-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="quizProgress" style="width:0%"></div></div>
+
+    <!-- Q1 -->
+    <div class="quiz-q active" id="q1">
+      <span class="q-num">Domanda 1 di 10</span>
+      <h4>Quale principio spiega perché l'aria che scorre sull'estradosso genera portanza riducendo la pressione?</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">3ª Legge di Newton</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Principio di Bernoulli</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Effetto Coandă</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Legge di Boyle-Mariotte</button>
+      <div class="quiz-feedback" id="f1"></div>
+    </div>
+    <!-- Q2 -->
+    <div class="quiz-q" id="q2">
+      <span class="q-num">Domanda 2 di 10</span>
+      <h4>Quale superficie di controllo governa il <strong>rollio</strong> dell'aeroplano?</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Equilibratori</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Timone di direzione</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Alettoni</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Flap</button>
+      <div class="quiz-feedback" id="f2"></div>
+    </div>
+    <!-- Q3 -->
+    <div class="quiz-q" id="q3">
+      <span class="q-num">Domanda 3 di 10</span>
+      <h4>Come si chiama la superficie fissa verticale posta in coda che stabilizza l'aereo in imbardata?</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Stabilizzatore orizzontale</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Deriva (piano verticale)</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Equilibratore</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Spoiler</button>
+      <div class="quiz-feedback" id="f3"></div>
+    </div>
+    <!-- Q4 -->
+    <div class="quiz-q" id="q4">
+      <span class="q-num">Domanda 4 di 10</span>
+      <h4>In volo livellato costante, quale relazione esiste tra le forze?</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Spinta > Resistenza e Portanza > Peso</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Portanza = Peso e Spinta = Resistenza</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Peso > Portanza e Resistenza > Spinta</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Tutte le forze sono uguali a zero</button>
+      <div class="quiz-feedback" id="f4"></div>
+    </div>
+    <!-- Q5 -->
+    <div class="quiz-q" id="q5">
+      <span class="q-num">Domanda 5 di 10</span>
+      <h4>Cosa indica la sigla "NACA 2412"?</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Un tipo di motore con 2 pistoni da 412 cc</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Un aeroplano militare del 1924</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Un profilo alare con camber 2%, posizione 40% della corda, spessore 12%</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Un codice di classificazione radar</button>
+      <div class="quiz-feedback" id="f5"></div>
+    </div>
+    <!-- Q6 -->
+    <div class="quiz-q" id="q6">
+      <span class="q-num">Domanda 6 di 10</span>
+      <h4>I <strong>flap</strong> vengono estesi principalmente durante:</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Il volo in crociera ad alta quota</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Il decollo e l'atterraggio</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Il rullaggio sull'aeroporto</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Solo durante le turbolenze</button>
+      <div class="quiz-feedback" id="f6"></div>
+    </div>
+    <!-- Q7 -->
+    <div class="quiz-q" id="q7">
+      <span class="q-num">Domanda 7 di 10</span>
+      <h4>Quale profilo alare è più adatto al volo supersonico?</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Clark-Y</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">NACA 2412</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Profilo biconvesso sottile</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Profilo asimmetrico convesso</button>
+      <div class="quiz-feedback" id="f7"></div>
+    </div>
+    <!-- Q8 -->
+    <div class="quiz-q" id="q8">
+      <span class="q-num">Domanda 8 di 10</span>
+      <h4>Cosa succede se l'angolo di attacco (AOA) supera l'angolo critico di stallo?</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">La portanza aumenta progressivamente</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">La resistenza aerodinamica si azzera</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Il flusso laminar si separa e la portanza crolla improvvisamente</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Il motore si spegne automaticamente</button>
+      <div class="quiz-feedback" id="f8"></div>
+    </div>
+    <!-- Q9 -->
+    <div class="quiz-q" id="q9">
+      <span class="q-num">Domanda 9 di 10</span>
+      <h4>Il <strong>profilo supercritico</strong> (Whitcomb) è stato sviluppato principalmente per:</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Aumentare la portanza nei voli subsonici lenti</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Ritardare la formazione di onde d'urto nel volo transonico</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Permettere il volo rovescio degli aerei acrobatici</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">Ridurre il rumore del motore</button>
+      <div class="quiz-feedback" id="f9"></div>
+    </div>
+    <!-- Q10 -->
+    <div class="quiz-q" id="q10">
+      <span class="q-num">Domanda 10 di 10</span>
+      <h4>Quale sistema dell'aeroplano permette di controllare l'aereo tramite segnali elettronici anziché connessioni meccaniche dirette?</h4>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">TCAS</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">INS (Sistema Inerziale)</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'correct')">Fly-by-Wire</button>
+      <button class="answer-btn" onclick="checkAnswer(this,'wrong')">GPWS</button>
+      <div class="quiz-feedback" id="f10"></div>
+    </div>
+
+    <!-- Result -->
+    <div class="quiz-q" id="qResult">
+      <span class="q-num">Risultato Finale</span>
+      <h4 id="resultText" style="font-size:2rem; text-align:center; margin:20px 0;"></h4>
+      <p id="resultMsg" style="text-align:center; color:var(--text-dim); font-style:italic;"></p>
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn primary" onclick="restartQuiz()">Ricomincia il Quiz</button>
+      </div>
+    </div>
+
+    <div class="quiz-nav">
+      <button class="btn" id="prevBtn" onclick="prevQ()" disabled>← Precedente</button>
+      <span class="score-display" id="scoreDisplay">Punteggio: 0 / 10</span>
+      <button class="btn" id="nextBtn" onclick="nextQ()" disabled>Successiva →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SEZIONE 7 — GLOSSARIO
+═══════════════════════════════════════════ -->
+<section class="section" id="glossario">
+  <h2 class="section-title">Glossario Aeronautico</h2>
+  <p class="section-intro">Tutti i termini tecnici usati nell'infografica, con definizioni chiare e precise. Usa la barra di ricerca per trovare rapidamente un termine.</p>
+
+  <input type="text" class="glossary-search" placeholder="🔍 Cerca un termine..." oninput="filterGlossary(this.value)">
+
+  <dl class="glossary-list" id="glossaryList">
+    <div class="glossary-item"><dt>Angolo di Attacco (AOA)</dt><dd>Angolo tra la corda del profilo alare e la direzione del flusso d'aria relativo. Aumentando l'AOA si aumenta la portanza fino all'angolo critico, oltre il quale si verifica lo stallo.</dd></div>
+    <div class="glossary-item"><dt>Apertura Alare (Wingspan)</dt><dd>Distanza da un'estremità alare all'altra. Maggiore l'apertura, minore il drag indotto (migliore efficienza). Un Boeing 777X ha un'apertura di 71.8 m.</dd></div>
+    <div class="glossary-item"><dt>Bernoulli, Principio di</dt><dd>In un fluido in moto stazionario, la somma di pressione statica, pressione dinamica e pressione idrostatica è costante. Dove la velocità aumenta, la pressione diminuisce e viceversa.</dd></div>
+    <div class="glossary-item"><dt>Baricentro (CG - Center of Gravity)</dt><dd>Punto dell'aeromobile dove si considera applicata la forza peso. La sua posizione influenza la stabilità: deve essere entro limiti precisi definiti dal costruttore.</dd></div>
+    <div class="glossary-item"><dt>Camber</dt><dd>Curvatura del profilo alare, definita come la distanza massima tra la linea media e la corda, espressa in percentuale della corda. Maggiore camber = maggiore portanza a basse velocità.</dd></div>
+    <div class="glossary-item"><dt>Centro di Pressione</dt><dd>Punto del profilo alare dove si considera applicata la forza aerodinamica risultante. Si sposta con la variazione dell'angolo di attacco.</dd></div>
+    <div class="glossary-item"><dt>Corda (Chord)</dt><dd>Linea retta che congiunge il bordo d'entrata e il bordo d'uscita del profilo alare. È la dimensione di riferimento per esprimere le grandezze del profilo in percentuale.</dd></div>
+    <div class="glossary-item"><dt>Drag Indotto</dt><dd>Resistenza aerodinamica causata dai vortici alle estremità alari, conseguenza diretta della generazione di portanza. Si riduce aumentando l'apertura alare o usando winglet.</dd></div>
+    <div class="glossary-item"><dt>Drag Parassita</dt><dd>Resistenza aerodinamica causata dall'attrito della superficie (skin friction) e dalla forma dell'aeromobile (form drag). Aumenta con il quadrato della velocità.</dd></div>
+    <div class="glossary-item"><dt>Extradosso (Dorso)</dt><dd>Superficie superiore del profilo alare. È la superficie su cui l'aria accelera generando pressione ridotta e quindi portanza.</dd></div>
+    <div class="glossary-item"><dt>Flap</dt><dd>Superfici mobili sul bordo d'uscita delle ali che aumentano la curvatura e la superficie alare durante decollo e atterraggio, permettendo velocità operative più basse.</dd></div>
+    <div class="glossary-item"><dt>Fly-by-Wire (FBW)</dt><dd>Sistema di controllo elettronico in cui i comandi del pilota vengono convertiti in segnali digitali trasmessi ai computer di volo, che li elaborano e azionano le superfici di controllo tramite attuatori elettrici o idraulici.</dd></div>
+    <div class="glossary-item"><dt>Intradosso (Ventre)</dt><dd>Superficie inferiore del profilo alare. Ha una pressione maggiore rispetto all'estradosso, contribuendo alla portanza dal basso verso l'alto.</dd></div>
+    <div class="glossary-item"><dt>Linea Media (Mean Camber Line)</dt><dd>Curva equidistante dalla superficie superiore e inferiore del profilo alare. Nei profili simmetrici coincide con la corda; nei profili asimmetrici è curva.</dd></div>
+    <div class="glossary-item"><dt>Mach, Numero di</dt><dd>Rapporto tra la velocità di un oggetto e la velocità del suono nel medesimo mezzo. Mach 1 = velocità del suono (~340 m/s a livello del mare). Mach &lt;0.8: subsonico; 0.8–1.2: transonico; &gt;1.2: supersonico.</dd></div>
+    <div class="glossary-item"><dt>NACA (National Advisory Committee for Aeronautics)</dt><dd>Agenzia statunitense precursore della NASA, fondamentale per lo sviluppo sistematico dei profili alari standard negli anni 1920-1950. Le serie NACA sono ancora usate come riferimento.</dd></div>
+    <div class="glossary-item"><dt>Portanza (Lift)</dt><dd>Forza aerodinamica perpendicolare alla direzione del moto che si oppone al peso. Generata dal profilo alare grazie alla differenza di pressione tra estradosso e intradosso.</dd></div>
+    <div class="glossary-item"><dt>Profilo Alare (Airfoil)</dt><dd>Sezione trasversale dell'ala di un aeromobile. La sua forma geometrica determina le caratteristiche aerodinamiche: portanza, resistenza e comportamento allo stallo.</dd></div>
+    <div class="glossary-item"><dt>Rapporto di Finezza (L/D)</dt><dd>Rapporto tra portanza e resistenza aerodinamica. Un valore elevato indica efficienza aerodinamica: un aliante può avere L/D = 50:1, un Boeing 747 circa 17:1.</dd></div>
+    <div class="glossary-item"><dt>Reynolds, Numero di (Re)</dt><dd>Numero adimensionale che esprime il rapporto tra forze inerziali e forze viscose in un fluido. Determina se il flusso è laminare o turbolento. Re basso → laminare; Re alto → turbolento.</dd></div>
+    <div class="glossary-item"><dt>Slat</dt><dd>Superfici mobili sul bordo d'entrata dell'ala (leading edge slats) che aumentano la curvatura anteriore del profilo, migliorando le prestazioni a bassa velocità.</dd></div>
+    <div class="glossary-item"><dt>Spoiler</dt><dd>Pannelli che si alzano dall'estradosso dell'ala per disturbare il flusso laminare, riducendo la portanza e aumentando la resistenza. Usati come freni aerodinamici e per controllare il rollio in combinazione con gli alettoni.</dd></div>
+    <div class="glossary-item"><dt>Stallo (Stall)</dt><dd>Condizione critica in cui l'angolo di attacco supera il valore critico (tipicamente 15-20°), causando la separazione dello strato limite e il crollo improvviso della portanza.</dd></div>
+    <div class="glossary-item"><dt>Strato Limite (Boundary Layer)</dt><dd>Sottile strato di fluido a contatto con la superficie alare in cui la velocità passa da zero (parete) al valore del flusso libero. La sua separazione causa lo stallo.</dd></div>
+    <div class="glossary-item"><dt>Vortici Alari (Wingtip Vortices)</dt><dd>Spirali d'aria che si formano alle estremità alari per la differenza di pressione tra estradosso e intradosso. Causano il drag indotto e il fenomeno dello "wake turbulence" che rappresenta un pericolo per i velivoli che seguono.</dd></div>
+    <div class="glossary-item"><dt>Winglet</dt><dd>Superficie verticale alle estremità alari che riduce i vortici alari e quindi il drag indotto, migliorando l'efficienza in crociera del 3-5%. Possono avere forme diverse: raked, blended, sharklet, ecc.</dd></div>
+  </dl>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <p>✈ Infografica Interattiva — Aeroplano e Profili Alari &nbsp;|&nbsp; Uso Didattico</p>
+  <p style="margin-top:6px;">Realizzata per GitHub Pages &nbsp;•&nbsp; Ottima per la presentazione scolastica</p>
+</footer>
+
+<script>
+// ─── SECTION SWITCHING ───
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = ['anatomia','parti','profili','forze','controlli','glossario'].indexOf(id);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  window.scrollTo({top: 80, behavior:'smooth'});
+}
+
+// ─── ANATOMY HOTSPOTS ───
+const partData = {
+  fusoliera: {
+    tag: 'Struttura Primaria',
+    title: '1. Fusoliera',
+    body: 'Il corpo principale del velivolo. Contiene la cabina passeggeri (o stiva merci), il cockpit, i sistemi idraulici e i serbatoi. Ha profilo aerodinamico affusolato per ridurre la resistenza. Nei jet moderni è realizzata in lega di alluminio, titanio e materiali compositi (fibra di carbonio). La pressurizzazione consente di mantenere una pressione equivalente a ~2400m anche in volo ad alta quota.',
+    fact: '💡 Un Boeing 737 ha una fusoliera di ~28m; un A380 di oltre 72m.'
+  },
+  ala: {
+    tag: 'Superficie Portante',
+    title: '2. Ala',
+    body: 'La superficie principale che genera la portanza (lift). La forma del profilo alare crea una differenza di pressione: l\'aria accelera sull\'estradosso (bordo superiore, più curvo) riducendo la pressione → l\'ala viene "aspirata" verso l\'alto. L\'angolo d\'incidenza e il profilo alare determinano l\'efficienza. Le ali contengono anche i serbatoi carburante (wet wings) e le superfici di controllo (alettoni, flap).',
+    fact: '💡 L\'ala di un B777X ha un\'apertura di 71.8 m con winglet ripiegabili.'
+  },
+  motore: {
+    tag: 'Propulsione',
+    title: '3. Motore Turbofan',
+    body: 'Genera la spinta necessaria al volo succhiando aria, comprimendola, miscelando con il carburante e bruciandola. Nel turbofan (il più comune), una grande ventola anteriore bypassa parte dell\'aria intorno al nucleo del motore (bypass ratio). I motori moderni (GE9X, Trent XWB) hanno rapporti di bypass di 9:1 o superiori, garantendo alta efficienza e basso rumore. La spinta si misura in kN o libbre-forza.',
+    fact: '💡 Il GE9X (B777X) eroga 105.000 lbf (467 kN) di spinta. È il turbofan più potente del mondo.'
+  },
+  deriva: {
+    tag: 'Stabilizzatore Verticale',
+    title: '4. Deriva (Piano Verticale)',
+    body: 'Superficie fissa verticale in coda che garantisce la stabilità direzionale (sull\'asse di imbardata/yaw). Se il muso devia lateralmente, la deriva crea una forza aerodinamica che riporta l\'aereo in assetto. Il timone di direzione (rudder) è incernierato al suo bordo posteriore. L\'altezza della deriva varia: è grande sugli aerei multimotion per compensare l\'asimmetria di spinta in caso di guasto motore.',
+    fact: '💡 La deriva del Lockheed SR-71 Blackbird è inclinata per ridurre la traccia radar (stealth).'
+  },
+  stabilizzatore: {
+    tag: 'Piano di Coda Orizzontale',
+    title: '5. Stabilizzatore Orizzontale',
+    body: 'Superficie fissa in coda che garantisce la stabilità longitudinale (sull\'asse di beccheggio/pitch). Se il muso si alza troppo, il piano di coda crea una forza verso il basso che lo riporta in posizione. Nei jet moderni il piano orizzontale è spesso mobile nella sua interezza (stabilizzatore regolabile o THS – Trimmable Horizontal Stabilizer) per ottimizzare l\'assetto in crociera.',
+    fact: '💡 Nel velivolo Concorde il piano orizzontale era inclinato verso l\'alto per compensare il baricentro che si spostava in volo supersonico.'
+  },
+  alettone: {
+    tag: 'Controllo del Rollio',
+    title: '6. Alettone',
+    body: 'Superfici mobili al bordo posteriore delle ali esterne che si muovono in modo opposto. Quando l\'alettone sinistro si abbassa, quello destro si alza: l\'ala sinistra genera più portanza e si alza, l\'aereo ruota (rolla). Fondamentali per le virate: si usano insieme al timone per una virata coordinata senza slittamento laterale. Controllati dal joystick/cloche inclinato lateralmente.',
+    fact: '💡 Gli alettoni degli aerei da caccia si muovono molto più velocemente di quelli civili, per manovrabilità estrema.'
+  },
+  flap: {
+    tag: 'Ipersostentatori',
+    title: '7. Flap',
+    body: 'Superfici mobili al bordo d\'uscita che aumentano la curvatura (camber) del profilo alare, incrementando il coefficiente di portanza C_L. Usati a decollo (10-20°) per portanza extra e ad atterraggio (30-40°) per volare più lentamente in sicurezza. I flap Fowler scivolano indietro aumentando anche la superficie alare. I Slat (bordo d\'entrata) funzionano con un principio simile.',
+    fact: '💡 Con flap a 40° un Airbus A320 può atterrare a ~250 km/h invece di ~340 km/h.'
+  },
+  timone: {
+    tag: 'Controllo Direzionale',
+    title: '8. Timone di Direzione (Rudder)',
+    body: 'Superficie mobile sul bordo posteriore della deriva verticale. Il pilota lo controlla con i pedali. Devia il muso lateralmente (imbardata). In volo normale si usa coordinato con gli alettoni per virate bilanciate. Fondamentale per: atterraggio con vento trasversale (crosswind), recupero stallo asimmetrico, compensazione dopo guasto motore in multi-motore.',
+    fact: '💡 In un atterraggio con forte crosswind, i piloti usano la tecnica "crab" o "slip" con il timone per allinearsi con la pista.'
+  },
+  cabina: {
+    tag: 'Posto di Comando',
+    title: '9. Cockpit / Abitacolo',
+    body: 'Il posto di comando del pilota e del copilota. Ospita: strumenti di volo (altimetro, anemometro, variometro), avionics (GPS, radar, TCAS), comandi motore (throttle), Flight Management System (FMS), pannelli di comunicazione radio. Nei jet fly-by-wire moderni (Airbus) i comandi sono un sidestick elettronico. Il parabrezza in vetro stratificato resiste a impatti con uccelli a 300 kt.',
+    fact: '💡 Il cockpit di un A350 ha oltre 1.000 spie luminose e interruttori, gestibili da soli 2 piloti.'
+  },
+  carrello: {
+    tag: 'Sistema di Atterraggio',
+    title: '10. Carrello d\'Atterraggio',
+    body: 'Sistema retrattile che assorbe gli urti dell\'atterraggio e consente il movimento a terra. Composto da: carrello anteriore (nose gear) per lo sterzo, due carrelli principali (main gear) per portare il peso. I pneumatici sono gonfiati ad alta pressione (oltre 12 bar nei jet). Freni a disco in carbonio. Sistema antiskid simile all\'ABS. Dopo il decollo si ritrae nel vano per ridurre il drag.',
+    fact: '💡 I pneumatici del B747 devono sostenere oltre 400 tonnellate a un impatto di atterraggio.'
+  }
+};
+
+function showPart(id) {
+  const d = partData[id];
+  if (!d) return;
+  document.getElementById('partInfo').innerHTML = `
+    <span class="tag">${d.tag}</span>
+    <h3>${d.title}</h3>
+    <p>${d.body}</p>
+    <div class="fun-fact">${d.fact}</div>
+  `;
+  document.querySelectorAll('.part-hotspot').forEach(h => h.classList.remove('active'));
+}
+
+// ─── AOA SIMULATOR ───
+const aoaDescriptions = {
+  '-5': '⚠️ <strong>Angolo negativo.</strong> Il profilo genera portanza negativa — forza verso il basso. Usato raramente (volo rovescio, discesa ripida). Il bordo d\'entrata punta verso il basso rispetto al flusso d\'aria.',
+  '0':  '➡ <strong>Incidenza zero.</strong> Per un profilo asimmetrico genera una piccola portanza positiva. Per un profilo simmetrico la portanza è zero. Flusso d\'aria parallelo alla corda.',
+  '5':  '✅ <strong>Regime normale di volo.</strong> Portanza ottimale. L\'aria fluisce regolarmente sopra il profilo alare senza separazione dello strato limite. Tipico in crociera.',
+  '10': '✅ <strong>Portanza elevata.</strong> Aumento significativo di C_L. Tipico in avvicinamento all\'atterraggio o in curva stretta. Il drag aumenta ma la portanza è ancora ottima.',
+  '15': '⚠️ <strong>Zona pre-stallo.</strong> Lo strato limite inizia a separarsi sul bordo d\'uscita. Portanza ancora presente ma con aumento rapido del drag. I sistemi di allarme stallo si attivano.',
+  '18': '🔴 <strong>STALLO!</strong> Lo strato limite si è separato completamente dal dorso. La portanza crolla improvvisamente. L\'aereo vibra (buffeting) e perde quota. Il pilota deve abbassare il muso per recuperare il flusso laminare.',
+  '25': '🔴 <strong>STALLO PROFONDO.</strong> Angolo critico ampiamente superato. Portanza quasi nulla, drag massimo. Condizione molto pericolosa in volo a bassa quota. Manovre di recupero urgenti.'
+};
+
+function updateAOA(val) {
+  const v = parseInt(val);
+  document.getElementById('aoaVal').textContent = val + '°';
+  const svg = document.getElementById('airfoilGroup');
+  svg.setAttribute('transform', `rotate(${-v}, 100, 90)`);
+  
+  // Find nearest description
+  const keys = Object.keys(aoaDescriptions).map(Number).sort((a,b)=>a-b);
+  let nearest = keys.reduce((prev, curr) => Math.abs(curr-v) < Math.abs(prev-v) ? curr : prev);
+  document.getElementById('aoaStatus').innerHTML = aoaDescriptions[nearest] || aoaDescriptions['5'];
+  
+  // Change lift arrow
+  const lift = document.getElementById('liftArrow');
+  const liftH = Math.max(5, 30 - Math.abs(v > 15 ? (v-15)*3 : 0));
+  if (v > 16) {
+    lift.setAttribute('stroke', '#e84444');
+    document.getElementById('liftLabel').setAttribute('fill', '#e84444');
+  } else {
+    lift.setAttribute('stroke', '#3dd68c');
+    document.getElementById('liftLabel').setAttribute('fill', '#3dd68c');
+  }
+}
+
+// ─── QUIZ ───
+let currentQ = 1;
+let score = 0;
+let answered = {};
+
+const feedbacks = {
+  f1: { correct: 'Esatto! Il principio di Bernoulli afferma che dove la velocità del fluido aumenta, la pressione diminuisce. Sull\'estradosso l\'aria accelera → pressione cala → portanza verso l\'alto.', wrong: 'Non corretto. La 3ª legge di Newton spiega il fenomeno del downwash, ma il principio che spiega la riduzione di pressione dove l\'aria accelera è quello di Bernoulli.' },
+  f2: { correct: 'Perfetto! Gli alettoni sono le superfici mobili sulle ali esterne che, muovendosi in modo opposto, controllano il rollio (rotazione attorno all\'asse longitudinale).', wrong: 'Non corretto. Gli alettoni controllano il rollio. Gli equilibratori controllano il beccheggio, il timone l\'imbardata.' },
+  f3: { correct: 'Esattamente! La deriva è la superficie fissa verticale di coda. Stabilizza l\'aereo in imbardata. Al suo bordo posteriore si trova il timone di direzione mobile.', wrong: 'Risposta errata. La deriva è la superficie verticale fissa. Lo stabilizzatore è quello orizzontale.' },
+  f4: { correct: 'Perfetto! In volo livellato costante (velocità e quota costanti), tutte le forze sono in equilibrio: Portanza=Peso e Spinta=Resistenza. Seconda Legge di Newton: forza netta = 0.', wrong: 'Non corretto. Se le forze non fossero in equilibrio, l\'aereo accelererebbe o cambierebbe quota.' },
+  f5: { correct: 'Corretto! NACA 2412: prima cifra = camber max 2% della corda; seconda cifra = posizione del camber al 40% (×10); ultime due cifre = spessore massimo 12%.', wrong: 'Sbagliato! La codifica NACA descrive le caratteristiche geometriche del profilo alare.' },
+  f6: { correct: 'Giusto! I flap si estendono durante decollo (10-20°) per generare più portanza, e atterraggio (30-40°) per ridurre la velocità minima di volo. In crociera sono retratti per minimizzare il drag.', wrong: 'Non esatto. In crociera i flap sono sempre retratti; si usano solo a bassa velocità (decollo/atterraggio).' },
+  f7: { correct: 'Corretto! I profili biconvessi sottili (spessore &lt;5%) generano meno onde d\'urto supersoniche. Usati su F-104, Concorde e altri velivoli supersonici dove la velocità è prioritaria.', wrong: 'Non corretto. Clark-Y e NACA 2412 sono ottimi a bassa velocità. Il profilo biconvesso sottile è quello adatto al supersonioco.' },
+  f8: { correct: 'Esatto! Superato l\'angolo critico di stallo (~15-18° per la maggior parte dei profili), lo strato limite si separa. La portanza crolla improvvisamente e il drag aumenta enormemente.', wrong: 'Non corretto. Nello stallo la portanza crolla a causa della separazione dello strato limite; il motore non si spegne automaticamente.' },
+  f9: { correct: 'Perfetto! Il profilo supercritico di Whitcomb ha il dorso quasi piatto che distribuisce uniformemente la pressione, ritardando la formazione di onde d\'urto locali nel volo transonico (Mach 0.7-0.9).', wrong: 'Non corretto. Il profilo supercritico fu sviluppato specificamente per il volo transonico dei jet commerciali.' },
+  f10: { correct: 'Corretto! Il Fly-by-Wire (FBW) sostituisce i cavi meccanici con segnali elettronici. I computer di volo elaborano gli input del pilota e comandano gli attuatori. Airbus lo usa dal 1988 (A320).', wrong: 'Non corretto. TCAS è il sistema anticollisione, INS è la navigazione inerziale. Fly-by-Wire è il sistema di controllo elettronico.' }
+};
+
+function checkAnswer(btn, result) {
+  if (answered[currentQ]) return;
+  answered[currentQ] = result;
+  
+  const feedback = document.getElementById('f' + currentQ);
+  const fKey = 'f' + currentQ;
+  
+  btn.classList.add(result);
+  feedback.textContent = feedbacks[fKey][result];
+  feedback.classList.add('show', result === 'correct' ? 'ok' : 'no');
+  
+  if (result === 'correct') {
+    score++;
+    document.getElementById('scoreDisplay').textContent = `Punteggio: ${score} / 10`;
+  }
+  
+  document.getElementById('nextBtn').disabled = false;
+  
+  // Disable all buttons in this question
+  btn.closest('.quiz-q').querySelectorAll('.answer-btn').forEach(b => b.style.pointerEvents = 'none');
+}
+
+function nextQ() {
+  if (currentQ >= 10) {
+    showResult(); return;
+  }
+  document.getElementById('q' + currentQ).classList.remove('active');
+  currentQ++;
+  document.getElementById('q' + currentQ).classList.add('active');
+  document.getElementById('prevBtn').disabled = false;
+  document.getElementById('nextBtn').disabled = !answered[currentQ];
+  updateProgress();
+}
+
+function prevQ() {
+  if (currentQ <= 1) return;
+  document.getElementById('q' + currentQ).classList.remove('active');
+  currentQ--;
+  document.getElementById('q' + currentQ).classList.add('active');
+  document.getElementById('prevBtn').disabled = currentQ === 1;
+  document.getElementById('nextBtn').disabled = !answered[currentQ];
+  updateProgress();
+}
+
+function updateProgress() {
+  document.getElementById('quizProgress').style.width = ((currentQ-1)/10*100) + '%';
+}
+
+function showResult() {
+  document.getElementById('q10').classList.remove('active');
+  document.getElementById('qResult').classList.add('active');
+  document.getElementById('quizProgress').style.width = '100%';
+  const pct = score/10;
+  let emoji, msg;
+  if (pct >= 0.9) { emoji = '🏆 ' + score + '/10'; msg = 'Eccellente! Sei un vero esperto di aerodinamica. Pronto per l\'Accademia Aeronautica!'; }
+  else if (pct >= 0.7) { emoji = '⭐ ' + score + '/10'; msg = 'Ottimo risultato! Buona padronanza degli argomenti. Ripassate i punti mancanti.'; }
+  else if (pct >= 0.5) { emoji = '📚 ' + score + '/10'; msg = 'Risultato sufficiente. Rileggete le sezioni sull\'aerodinamica e i profili alari.'; }
+  else { emoji = '✈ ' + score + '/10'; msg = 'Continua a studiare! Rileggi tutta l\'infografica con attenzione prima di riprovare.'; }
+  document.getElementById('resultText').textContent = emoji;
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('nextBtn').disabled = true;
+}
+
+function restartQuiz() {
+  currentQ = 1; score = 0; answered = {};
+  document.getElementById('scoreDisplay').textContent = 'Punteggio: 0 / 10';
+  document.getElementById('quizProgress').style.width = '0%';
+  document.getElementById('prevBtn').disabled = true;
+  document.getElementById('nextBtn').disabled = true;
+  document.querySelectorAll('.quiz-q').forEach(q => {
+    q.classList.remove('active');
+    q.querySelectorAll('.answer-btn').forEach(b => {
+      b.classList.remove('correct','wrong');
+      b.style.pointerEvents = '';
+    });
+    q.querySelectorAll('.quiz-feedback').forEach(f => {
+      f.classList.remove('show','ok','no');
+      f.textContent = '';
+    });
+  });
+  document.getElementById('q1').classList.add('active');
+}
+
+// ─── GLOSSARY SEARCH ───
+function filterGlossary(val) {
+  const q = val.toLowerCase();
+  document.querySelectorAll('.glossary-item').forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.classList.toggle('hidden', q.length > 0 && !text.includes(q));
+  });
+}
+</script>
+</body>
+</html>
